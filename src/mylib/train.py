@@ -408,7 +408,7 @@ class seq2seq(nn.Module):
         #decoder_input = outputs[:, 0, :].view(input.shape[0], 1, input.shape[2])
         #decoder_input = torch.zeros(len(input), 1).view(input.shape[0], 1, input.shape[2]).to(device)
 
-        for t in range(target_len):
+        for t in range(self.target_len):
             decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
             outputs[:, t:t+1] = self.linear(decoder_output)
             teacher_force = random.random() < self.teacher_forcing_ratio

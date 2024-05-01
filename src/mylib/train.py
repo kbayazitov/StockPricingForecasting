@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 import torch.nn as nn
+import random
 from tqdm.notebook import tqdm
 from sklearn import metrics
 import matplotlib.pyplot as plt
@@ -363,7 +364,7 @@ class seq2seq(nn.Module):
     def device(self):
         return next(self.parameters()).device
 
-    def __init__(self, input_size, hidden_size, num_layers=1, dropout=0.4, bidirectional=False, teacher_forcing_ratio=0):
+    def __init__(self, input_size, hidden_size, num_layers=1, dropout=0.4, bidirectional=False, teacher_forcing_ratio=0, target_len=10):
 
         '''
         : param input_size:     the number of expected features in the input X
@@ -378,12 +379,13 @@ class seq2seq(nn.Module):
         self.dropout = dropout
         self.bidirectional = bidirectional
         self.teacher_forcing_ratio = teacher_forcing_ratio
+        self.target_len = target_len
 
         self.encoder = Encoder(input_size, hidden_size, num_layers, dropout, bidirectional)
         self.decoder = Decoder(input_size, hidden_size, num_layers, dropout, bidirectional)
         self.linear = nn.Linear(input_size, 1)
 
-    def forward(self, input, true_input=None, target_len=5):
+    def forward(self, input, true_input=None):
 
         '''
         : param input_tensor:      input data (seq_len, input_size); PyTorch tensor
@@ -433,4 +435,3 @@ def plot_test_results(model, test_dataset, input_size=30, output_size=10, num_ro
         ax[i].plot(np.linspace(input_size, input_size+output_size+1, output_size+1), [x_input[0,-1,3].item()]+pred[0].tolist(), color='r')
 
     plt.show()
-

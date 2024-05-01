@@ -400,7 +400,7 @@ class seq2seq(nn.Module):
         decoder_hidden = encoder_hidden
 
         # initialize tensor for predictions
-        outputs = torch.zeros(len(input), target_len, 1).to(self.device) # [batch_size, target_len, input_size]
+        outputs = torch.zeros(len(input), self.target_len, 1).to(self.device) # [batch_size, target_len, input_size]
 
         # decode input_tensor
         decoder_input = input[:, -1, :].view(input.shape[0], 1, input.shape[2])

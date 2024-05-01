@@ -427,7 +427,7 @@ def plot_test_results(model, test_dataset, input_size=30, output_size=10, num_ro
         x_input = test_dataset[i * 5][0].unsqueeze(0)
         y_input = test_dataset[i * 5][1].unsqueeze(0)
 
-        pred = model(x_input.to(device)).cpu().detach().numpy()
+        pred = model(x_input.to(model.device)).cpu().detach().numpy()
         ax[i].plot(np.linspace(0, input_size, input_size), x_input[0,:,3].tolist(), color='b')
         ax[i].plot(np.linspace(input_size, input_size+output_size+1, output_size+1), [x_input[0,-1,3].item()]+y_input[0,:,3].tolist(), color='g')
         ax[i].plot(np.linspace(input_size, input_size+output_size+1, output_size+1), [x_input[0,-1,3].item()]+pred[0].tolist(), color='r')

@@ -222,8 +222,8 @@ def train_forecasting_model(model, train_data, test_data, epochs=30, batch_size=
     torch.manual_seed(SEED)
     torch.cuda.manual_seed(SEED)
 
-    #list_of_train_rmse = []
-    #list_of_test_rmse = []
+    list_of_train_acc = []
+    list_of_test_acc = []
     list_of_train_losses = []
     list_of_test_losses = []
 
@@ -237,8 +237,8 @@ def train_forecasting_model(model, train_data, test_data, epochs=30, batch_size=
         elif loss_func == 'CustomMSE':
             loss_function = CustomMSE()
 
-        #train_rmse = []
-        #test_rmse = []
+        train_acc = []
+        test_acc = []
         train_losses = []
         test_losses = []
 
@@ -247,6 +247,7 @@ def train_forecasting_model(model, train_data, test_data, epochs=30, batch_size=
             train_true = 0
             train_loss = 0
             for x, y in tqdm(train_generator, leave=False):
+                model.train()
                 optimizer.zero_grad()
                 x = x.to(model.device)
                 y = y.to(model.device)
@@ -256,34 +257,37 @@ def train_forecasting_model(model, train_data, test_data, epochs=30, batch_size=
 
                 loss.backward()
                 optimizer.step()
-                #train_true += mean_squared_error(y.cpu(), output.cpu())
+                if output.shape[1] == 1:
+                    for i in range(len(x)):
+                        train_true += ((x[i,-1,3] >= output[i]) == (x[i,-1,3] >= y[i,:,3])).cpu().item()
                 train_loss += loss.cpu().item()
 
             test_generator = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False)
             test_true = 0
             test_loss = 0
             for x, y in tqdm(test_generator, leave=False):
+                model.eval()
                 x = x.to(model.device)
                 y = y.to(model.device)
                 output = model(x)
-
                 loss = loss_function(output, y[:,:,3])
 
-                #test_true += mean_squared_error(y.cpu().squeeze(), output.cpu().squeeze())
+                if output.shape[1] == 1:
+                    for i in range(len(x)):
+                        test_true += ((x[i,-1,3] >= output[i]) == (x[i,-1,3] >= y[i,:,3])).cpu().item()
                 test_loss += loss.cpu().item()
 
-            #train_rmse.append(train_true*32/len(train_data))
-            #test_rmse.append(test_true*32/len(test_data))
+            train_acc.append(train_true/len(train_data))
+            test_acc.append(test_true/len(test_data))
             train_losses.append(train_loss*batch_size/len(train_data))
             test_losses.append(test_loss*batch_size/len(test_data))
 
-        #list_of_train_rmse.append(train_rmse)
-        #list_of_test_rmse.append(test_rmse)
+        list_of_train_acc.append(train_acc)
+        list_of_test_acc.append(test_acc)
         list_of_train_losses.append(train_losses)
         list_of_test_losses.append(test_losses)
 
-    #return list_of_test_rmse, list_of_test_losses, list_of_train_rmse, list_of_train_losses
-    return list_of_test_losses, list_of_train_losses
+    return list_of_test_acc, list_of_test_losses, list_of_train_acc, list_of_train_losses
 
 class Encoder(nn.Module):
     @property

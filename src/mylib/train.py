@@ -440,7 +440,7 @@ def plot_test_results(model, test_dataset, input_size=30, output_size=10, num_ro
 
     plt.show()
 
-def get_datasets(data, iw=30, ow=1, s=1, nf=5, a=0, b=1, shift1=5, shift=1):
+def get_datasets(data, iw=30, ow=1, s=1, nf=5, a=0, b=1, shift1=5, shift2=1):
     train_datasets = []
     test_datasets = []
 

@@ -11,3 +11,5 @@ Abstract
 
 Software modules developed as part of the study
 ======================================================
+1. A python package *mylib* with all implementation `here <https://github.com/kbayazitov/StockPricingForecasting/tree/master/src>`_.
+2. A code with all experiment visualisation `here <https://github.com/kbayazitov/StockPricingForecasting/blob/master/code/main.ipynb>`_. Can use `colab <http://colab.research.google.com/github/kbayazitov/StockPricingForecasting/blob/master/code/main.ipynb>`_.

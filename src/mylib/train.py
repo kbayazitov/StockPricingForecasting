@@ -219,8 +219,8 @@ class CustomMSE(nn.Module):
 
 def train_forecasting_model(model, train_data, test_data, epochs=30, batch_size=32, lr=1e-3, loss_func='MSE', SEED=42):
 
-    torch.manual_seed(SEED)
-    torch.cuda.manual_seed(SEED)
+    #torch.manual_seed(SEED)
+    #torch.cuda.manual_seed(SEED)
 
     list_of_train_acc = []
     list_of_test_acc = []

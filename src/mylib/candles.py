@@ -32,7 +32,7 @@ def get_figi(ticker, TOKEN):
 
         return df['figi'].iloc[0]
 
-def get_candles_data(ticker, tf, date_from, date_to, TOKEN, settings):
+def get_candles_data(ticker, tf, date_from, date_to, TOKEN):
     timeframe_config = {
         '1MIN': CandleInterval.CANDLE_INTERVAL_1_MIN,
         '5MIN': CandleInterval.CANDLE_INTERVAL_5_MIN,

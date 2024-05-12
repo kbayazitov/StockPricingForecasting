@@ -1,5 +1,4 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 from datetime import timedelta, datetime, timezone
 from tinkoff.invest import Client, CandleInterval, InstrumentStatus, InstrumentRequest
 from tinkoff.invest.retrying.settings import RetryClientSettings

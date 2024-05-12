@@ -54,8 +54,10 @@ def get_candles_data(ticker, tf, date_from, date_to, TOKEN, settings):
         'volume': [],
         'time': [],
     }
-
-    with RetryingClient(TOKEN, settings) as client:
+    
+    retry_settings = RetryClientSettings(use_retry=True, max_retry_attempt=2)
+    
+    with RetryingClient(TOKEN, settings=retry_settings) as client:
         for candle in client.get_all_candles(
                 figi=figi,
                 from_=date_from,

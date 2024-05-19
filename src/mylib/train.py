@@ -46,7 +46,7 @@ def numpy_to_torch(Xtrain, Ytrain, Xtest, Ytest):
 
     return X_train_torch, Y_train_torch, X_test_torch, Y_test_torch
 
-def makeplots(losses, labels, accs=None, from_n=0, colors=['blue', 'green', 'red', 'orange', 'purple', 'pink', 'black']):
+def makeplots(losses, labels, corrs=None, from_n=0, colors=['blue', 'green', 'red', 'orange', 'purple', 'pink', 'black']):
     """
     Draws a plots of losses and accuracies
     Args:
@@ -60,15 +60,15 @@ def makeplots(losses, labels, accs=None, from_n=0, colors=['blue', 'green', 'red
     Example:
         >>>
     """
-    if (accs is not None):
-        for acc, color, label in zip(accs, colors, labels):
-            mean = np.array(acc).mean(0)
-            std = np.array(acc).std(0)
+    if (corrs is not None):
+        for corr, color, label in zip(corrs, colors, labels):
+            mean = np.array(corr).mean(0)
+            std = np.array(corr).std(0)
             x_axis = np.arange(0, len(mean))
             plt.plot(x_axis, mean, color=color, label=label)
             plt.fill_between(x_axis, mean-std, mean+std, alpha=0.3, color=color)
         plt.xlabel('Epochs', fontsize=30)
-        plt.ylabel('Acc', fontsize=30)
+        plt.ylabel('Corr', fontsize=30)
         plt.grid()
         plt.legend(loc='best')
         plt.show()
@@ -85,40 +85,36 @@ def makeplots(losses, labels, accs=None, from_n=0, colors=['blue', 'green', 'red
         x_axis = np.arange(from_n, len(mean) + from_n)
         plt.plot(x_axis, mean, color=color, label=label)
         plt.fill_between(x_axis, mean-std, mean+std, alpha=0.3, color=color)
+        
     plt.xlabel('Epochs', fontsize=30)
     plt.ylabel('MSE', fontsize=30)
     plt.grid()
     plt.legend(loc='best')
     plt.show()
 
-def train_model(model, train_data, test_data, epochs=30, batch_size=32, lr=1e-3, loss_func='MSE', SEED=42):
+def train_model(model, train_data, test_data, attempts=2, epochs=30, batch_size=32, lr=1e-3, SEED=42):
 
     #torch.manual_seed(SEED)
     #torch.cuda.manual_seed(SEED)
 
-    list_of_train_acc = []
-    list_of_test_acc = []
+    list_of_train_corrs = []
+    list_of_test_corrs = []
     list_of_train_losses = []
     list_of_test_losses = []
-
-    attempts = 2
 
     for attempt in tqdm(range(attempts)):
 
         optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-        if loss_func == 'MSE':
-            loss_function = nn.MSELoss()
-        elif loss_func == 'CustomMSE':
-            loss_function = CustomMSE()
+        loss_function = nn.MSELoss()
 
-        train_acc = []
-        test_acc = []
+        train_corrs = []
+        test_corrs = []
         train_losses = []
         test_losses = []
 
         for epoch in tqdm(range(epochs), leave=False):
             train_generator = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=False)
-            train_true = 0
+            train_corr = 0
             train_loss = 0
             for x, y in tqdm(train_generator, leave=False):
                 model.train()
@@ -131,13 +127,15 @@ def train_model(model, train_data, test_data, epochs=30, batch_size=32, lr=1e-3,
 
                 loss.backward()
                 optimizer.step()
-                if output.shape[1] == 1:
-                    for i in range(len(x)):
-                        train_true += ((x[i,-1,3] >= output[i]) == (x[i,-1,3] >= y[i,:,3])).cpu().item()
+                #if output.shape[1] == 1:
+                #    for i in range(len(x)):
+                #        train_true += ((x[i,-1,3] >= output[i]) == (x[i,-1,3] >= y[i,:,3])).cpu().item()
+
+                train_corr += np.corrcoef(output.cpu().detach().numpy(), y[:,:,3].cpu().detach().numpy())[0, 1]
                 train_loss += loss.cpu().item()
 
             test_generator = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False)
-            test_true = 0
+            test_corr = 0
             test_loss = 0
             for x, y in tqdm(test_generator, leave=False):
                 model.eval()
@@ -146,22 +144,24 @@ def train_model(model, train_data, test_data, epochs=30, batch_size=32, lr=1e-3,
                 output = model(x)
                 loss = loss_function(output, y[:,:,3])
 
-                if output.shape[1] == 1:
-                    for i in range(len(x)):
-                        test_true += ((x[i,-1,3] >= output[i]) == (x[i,-1,3] >= y[i,:,3])).cpu().item()
+                #if output.shape[1] == 1:
+                #    for i in range(len(x)):
+                #        test_true += ((x[i,-1,3] >= output[i]) == (x[i,-1,3] >= y[i,:,3])).cpu().item()
+
+                test_corr += np.corrcoef(output.cpu().detach().numpy(), y[:,:,3].cpu().detach().numpy())[0, 1]
                 test_loss += loss.cpu().item()
 
-            train_acc.append(train_true/len(train_data))
-            test_acc.append(test_true/len(test_data))
+            train_corrs.append(train_corr/len(train_data))
+            test_corrs.append(test_corr/len(test_data))
             train_losses.append(train_loss*batch_size/len(train_data))
             test_losses.append(test_loss*batch_size/len(test_data))
 
-        list_of_train_acc.append(train_acc)
-        list_of_test_acc.append(test_acc)
+        list_of_train_corrs.append(train_corrs)
+        list_of_test_corrs.append(test_corrs)
         list_of_train_losses.append(train_losses)
         list_of_test_losses.append(test_losses)
 
-    return list_of_test_acc, list_of_test_losses, list_of_train_acc, list_of_train_losses
+    return list_of_test_corrs, list_of_test_losses, list_of_train_corrs, list_of_train_losses
 
 class Encoder(nn.Module):
     @property

@@ -131,7 +131,9 @@ def train_model(model, train_data, test_data, attempts=2, epochs=30, batch_size=
                 #    for i in range(len(x)):
                 #        train_true += ((x[i,-1,3] >= output[i]) == (x[i,-1,3] >= y[i,:,3])).cpu().item()
 
-                train_corr += np.corrcoef(output.cpu().detach().numpy(), y[:,:,3].cpu().detach().numpy())[0, 1]
+                for i in range(len(output)):
+                    train_corr += np.corrcoef(output[i].cpu().detach().numpy(), y[i,:,3].cpu().detach().numpy())[0, 1]
+                    
                 train_loss += loss.cpu().item()
 
             test_generator = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False)
@@ -148,7 +150,9 @@ def train_model(model, train_data, test_data, attempts=2, epochs=30, batch_size=
                 #    for i in range(len(x)):
                 #        test_true += ((x[i,-1,3] >= output[i]) == (x[i,-1,3] >= y[i,:,3])).cpu().item()
 
-                test_corr += np.corrcoef(output.cpu().detach().numpy(), y[:,:,3].cpu().detach().numpy())[0, 1]
+                for i in range(len(output)):
+                    test_corr += np.corrcoef(output[i].cpu().detach().numpy(), y[i,:,3].cpu().detach().numpy())[0, 1]
+                    
                 test_loss += loss.cpu().item()
 
             train_corrs.append(train_corr/len(train_data))

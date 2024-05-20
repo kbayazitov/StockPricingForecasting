@@ -116,8 +116,9 @@ def train_model(model, train_data, test_data, attempts=2, epochs=30, batch_size=
             train_generator = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=False)
             train_corr = 0
             train_loss = 0
+            
+            model.train()
             for x, y in tqdm(train_generator, leave=False):
-                model.train()
                 optimizer.zero_grad()
                 x = x.to(model.device)
                 y = y.to(model.device)
@@ -139,8 +140,10 @@ def train_model(model, train_data, test_data, attempts=2, epochs=30, batch_size=
             test_generator = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False)
             test_corr = 0
             test_loss = 0
+
+            model.eval()
             for x, y in tqdm(test_generator, leave=False):
-                model.eval()
+
                 x = x.to(model.device)
                 y = y.to(model.device)
                 output = model(x)
@@ -166,6 +169,20 @@ def train_model(model, train_data, test_data, attempts=2, epochs=30, batch_size=
         list_of_test_losses.append(test_losses)
 
     return list_of_test_corrs, list_of_test_losses, list_of_train_corrs, list_of_train_losses
+
+def init_weights(m):
+    if isinstance(m, nn.Linear):
+        init.xavier_uniform_(m.weight)
+        if m.bias is not None:
+            init.zeros_(m.bias)
+    elif isinstance(m, nn.LSTM) or isinstance(m, nn.GRU):
+        for name, param in m.named_parameters():
+            if 'weight_ih' in name:
+                init.xavier_uniform_(param.data)
+            elif 'weight_hh' in name:
+                init.orthogonal_(param.data)
+            elif 'bias' in name:
+                init.zeros_(param.data)
 
 class Encoder(nn.Module):
     @property

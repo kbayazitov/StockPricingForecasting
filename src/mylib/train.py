@@ -172,17 +172,17 @@ def train_model(model, train_data, test_data, attempts=2, epochs=30, batch_size=
 
 def init_weights(m):
     if isinstance(m, nn.Linear):
-        init.xavier_uniform_(m.weight)
+        nn.init.xavier_uniform_(m.weight)
         if m.bias is not None:
-            init.zeros_(m.bias)
+            nn.init.zeros_(m.bias)
     elif isinstance(m, nn.LSTM) or isinstance(m, nn.GRU):
         for name, param in m.named_parameters():
             if 'weight_ih' in name:
-                init.xavier_uniform_(param.data)
+                nn.init.xavier_uniform_(param.data)
             elif 'weight_hh' in name:
-                init.orthogonal_(param.data)
+                nn.init.orthogonal_(param.data)
             elif 'bias' in name:
-                init.zeros_(param.data)
+                nn.init.zeros_(param.data)
 
 class Encoder(nn.Module):
     @property

@@ -62,9 +62,10 @@ def makeplots(losses, labels, corrs=None, from_n=0, colors=['blue', 'green', 're
     """
     if (corrs is not None):
         for corr, color, label in zip(corrs, colors, labels):
+            corr = [corr[i][from_n:] for i in range(len(corr))]
             mean = np.array(corr).mean(0)
             std = np.array(corr).std(0)
-            x_axis = np.arange(0, len(mean))
+            x_axis = np.arange(from_n, len(mean) + from_n)
             plt.plot(x_axis, mean, color=color, label=label)
             plt.fill_between(x_axis, mean-std, mean+std, alpha=0.3, color=color)
         plt.xlabel('Epochs', fontsize=30)

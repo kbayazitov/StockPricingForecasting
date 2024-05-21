@@ -93,7 +93,7 @@ def makeplots(losses, labels, corrs=None, from_n=0, colors=['blue', 'green', 're
     plt.legend(loc='best')
     plt.show()
 
-def train_model(model, train_data, test_data, attempts=2, epochs=30, batch_size=32, lr=1e-3, SEED=42):
+def train_model(model, train_data, test_data, n_steps=4, attempts=2, epochs=30, batch_size=32, lr=1e-3, SEED=42):
 
     #torch.manual_seed(SEED)
     #torch.cuda.manual_seed(SEED)
@@ -115,8 +115,10 @@ def train_model(model, train_data, test_data, attempts=2, epochs=30, batch_size=
 
         for epoch in tqdm(range(epochs), leave=False):
             train_generator = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=False)
-            train_corr = 0
             train_loss = 0
+
+            train_actual_values_per_step = [[] for _ in range(n_steps)]
+            train_pred_values_per_step = [[] for _ in range(n_steps)]
             
             model.train()
             for x, y in tqdm(train_generator, leave=False):
@@ -129,18 +131,21 @@ def train_model(model, train_data, test_data, attempts=2, epochs=30, batch_size=
 
                 loss.backward()
                 optimizer.step()
-                #if output.shape[1] == 1:
-                #    for i in range(len(x)):
-                #        train_true += ((x[i,-1,3] >= output[i]) == (x[i,-1,3] >= y[i,:,3])).cpu().item()
 
-                for i in range(len(output)):
-                    train_corr += np.corrcoef(output[i].cpu().detach().numpy(), y[i,:,3].cpu().detach().numpy())[0, 1]
+                y_true = y[:,:,3].cpu().detach().numpy()
+                y_pred = output.cpu().detach().numpy()
+
+                for step in range(n_steps):
+                    train_actual_values_per_step[step].extend(y_true[:, step])
+                    train_pred_values_per_step[step].extend(y_pred[:, step])
                     
                 train_loss += loss.cpu().item()
 
             test_generator = torch.utils.data.DataLoader(test_data, batch_size=batch_size, shuffle=False)
-            test_corr = 0
             test_loss = 0
+
+            test_actual_values_per_step = [[] for _ in range(n_steps)]
+            test_pred_values_per_step = [[] for _ in range(n_steps)]
 
             model.eval()
             for x, y in tqdm(test_generator, leave=False):
@@ -150,17 +155,37 @@ def train_model(model, train_data, test_data, attempts=2, epochs=30, batch_size=
                 output = model(x)
                 loss = loss_function(output, y[:,:,3])
 
-                #if output.shape[1] == 1:
-                #    for i in range(len(x)):
-                #        test_true += ((x[i,-1,3] >= output[i]) == (x[i,-1,3] >= y[i,:,3])).cpu().item()
+                y_true = y[:,:,3].cpu().detach().numpy()
+                y_pred = output.cpu().detach().numpy()
 
-                for i in range(len(output)):
-                    test_corr += np.corrcoef(output[i].cpu().detach().numpy(), y[i,:,3].cpu().detach().numpy())[0, 1]
+                for step in range(n_steps):
+                    test_actual_values_per_step[step].extend(y_true[:, step])
+                    test_pred_values_per_step[step].extend(y_pred[:, step])
                     
                 test_loss += loss.cpu().item()
 
-            train_corrs.append(train_corr/len(train_data))
-            test_corrs.append(test_corr/len(test_data))
+            train_actual_values_per_step = np.array(train_actual_values_per_step)
+            train_pred_values_per_step = np.array(train_pred_values_per_step)
+            test_actual_values_per_step = np.array(test_actual_values_per_step)
+            test_pred_values_per_step = np.array(test_pred_values_per_step)
+
+            train_corrs.append(
+                np.array(
+                    [np.corrcoef(train_actual_values_per_step[step], 
+                                 train_pred_values_per_step[step])[0, 1] 
+                     for step in range(n_steps)]
+                ).mean()
+            )
+            test_corrs.append(
+                np.array(
+                    [np.corrcoef(test_actual_values_per_step[step], 
+                                 test_pred_values_per_step[step])[0, 1] 
+                     for step in range(n_steps)]
+                ).mean()
+            )
+
+            #train_corrs.append(train_corr/len(train_data))
+            #test_corrs.append(test_corr/len(test_data))
             train_losses.append(train_loss*batch_size/len(train_data))
             test_losses.append(test_loss*batch_size/len(test_data))
 

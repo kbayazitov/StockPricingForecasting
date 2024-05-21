@@ -70,7 +70,7 @@ def makeplots(losses, labels, corrs=None, from_n=0, colors=['blue', 'green', 're
             plt.fill_between(x_axis, mean-std, mean+std, alpha=0.3, color=color)
         plt.xlabel('Epochs', fontsize=30)
         plt.ylabel('Corr', fontsize=30)
-        plt.grid()
+        #plt.grid()
         plt.legend(loc='best')
         plt.show()
 
@@ -89,7 +89,7 @@ def makeplots(losses, labels, corrs=None, from_n=0, colors=['blue', 'green', 're
         
     plt.xlabel('Epochs', fontsize=30)
     plt.ylabel('MSE', fontsize=30)
-    plt.grid()
+    #plt.grid()
     plt.legend(loc='best')
     plt.show()
 

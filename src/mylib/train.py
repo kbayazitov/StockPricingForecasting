@@ -1,5 +1,6 @@
 import numpy as np
 import torch
+from torch import nn
 from tqdm.notebook import tqdm
 
 def train_model(model, train_data, test_data, n_steps=4, attempts=2, epochs=30, batch_size=32, lr=1e-3, SEED=42):

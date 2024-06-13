@@ -39,6 +39,8 @@ def numpy_to_torch(Xtrain, Ytrain, Xtest, Ytest):
     X_test_torch = torch.from_numpy(Xtest).type(torch.Tensor)
     Y_test_torch = torch.from_numpy(Ytest).type(torch.Tensor)
 
+    return X_train_torch, Y_train_torch, X_test_torch, Y_test_torch
+
 def get_datasets(data, iw=30, ow=1, s=1, nf=5, a=0, b=1, shift1=5, shift2=1):
     train_datasets = []
     test_datasets = []

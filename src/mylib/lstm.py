@@ -1,3 +1,4 @@
+import torch
 from torch import nn
 
 class Encoder(nn.Module):
@@ -75,7 +76,7 @@ class Decoder(nn.Module):
 
         return output, hidden
 
-class seq2seq(nn.Module):
+class LSTM_seq2seq(nn.Module):
     @property
     def device(self):
         return next(self.parameters()).device
@@ -87,7 +88,7 @@ class seq2seq(nn.Module):
         : param hidden_size:    the number of features in the hidden state h
         '''
 
-        super(seq2seq, self).__init__()
+        super(LSTM_seq2seq, self).__init__()
 
         self.input_size = input_size
         self.hidden_size = hidden_size
@@ -147,3 +148,17 @@ class seq2seq(nn.Module):
                 decoder_input = decoder_output
 
         return outputs.squeeze(2)
+
+def init_weights(m):
+    if isinstance(m, nn.Linear):
+        nn.init.xavier_uniform_(m.weight)
+        if m.bias is not None:
+            nn.init.zeros_(m.bias)
+    elif isinstance(m, nn.LSTM) or isinstance(m, nn.GRU):
+        for name, param in m.named_parameters():
+            if 'weight_ih' in name:
+                nn.init.xavier_uniform_(param.data)
+            elif 'weight_hh' in name:
+                nn.init.orthogonal_(param.data)
+            elif 'bias' in name:
+                nn.init.zeros_(param.data)

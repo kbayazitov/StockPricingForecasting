@@ -3,10 +3,7 @@ import torch
 from torch import nn
 from tqdm.notebook import tqdm
 
-def train_model(model, train_data, test_data, n_steps=4, attempts=2, epochs=30, batch_size=32, lr=1e-3, SEED=42):
-
-    #torch.manual_seed(SEED)
-    #torch.cuda.manual_seed(SEED)
+def train_model(model, train_data, test_data, n_steps=4, attempts=2, epochs=30, batch_size=32, lr=1e-3):
 
     list_of_train_corrs = []
     list_of_test_corrs = []
@@ -94,8 +91,6 @@ def train_model(model, train_data, test_data, n_steps=4, attempts=2, epochs=30, 
                 ).mean()
             )
 
-            #train_corrs.append(train_corr/len(train_data))
-            #test_corrs.append(test_corr/len(test_data))
             train_losses.append(train_loss*batch_size/len(train_data))
             test_losses.append(test_loss*batch_size/len(test_data))
 

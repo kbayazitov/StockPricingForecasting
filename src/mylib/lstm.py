@@ -77,7 +77,7 @@ class Decoder(nn.Module):
 
         return output, hidden
 
-class LSTM_seq2seq(nn.Module):
+class Seq2SeqLSTM(nn.Module):
     @property
     def device(self):
         return next(self.parameters()).device
@@ -89,7 +89,7 @@ class LSTM_seq2seq(nn.Module):
         : param hidden_size:    the number of features in the hidden state h
         '''
 
-        super(LSTM_seq2seq, self).__init__()
+        super(Seq2SeqLSTM, self).__init__()
 
         self.input_size = input_size
         self.hidden_size = hidden_size

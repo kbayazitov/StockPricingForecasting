@@ -7,7 +7,7 @@ def makeplots(losses, labels, corrs=None, from_n=0, colors=['blue', 'green', 're
     Args:
         losses: list - losses
         labels: list - labels of plots
-        accs: list - accuracies
+        corrs: list - correlations
         colors: list - colors of plots
         task: ['Classification', 'Regression'] - task name
     Returns:
@@ -25,16 +25,10 @@ def makeplots(losses, labels, corrs=None, from_n=0, colors=['blue', 'green', 're
             plt.fill_between(x_axis, mean-std, mean+std, alpha=0.3, color=color)
         plt.xlabel('Epochs', fontsize=30)
         plt.ylabel('Corr', fontsize=30)
-        #plt.grid()
         plt.legend(loc='best')
         plt.show()
 
     for loss, color, label in zip(losses, colors, labels):
-        '''
-        mean = np.array(loss).mean(0)
-        std = np.array(loss).std(0)
-        x_axis = np.arange(0, len(mean))
-        '''
         loss = [loss[i][from_n:] for i in range(len(loss))]
         mean = np.array(loss).mean(0)
         std = np.array(loss).std(0)
@@ -44,7 +38,6 @@ def makeplots(losses, labels, corrs=None, from_n=0, colors=['blue', 'green', 're
         
     plt.xlabel('Epochs', fontsize=30)
     plt.ylabel('MSE', fontsize=30)
-    #plt.grid()
     plt.legend(loc='best')
     plt.show()
 

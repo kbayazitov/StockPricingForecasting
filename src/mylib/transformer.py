@@ -54,42 +54,15 @@ class Seq2SeqTransformer(nn.Module):
                 nn.init.xavier_uniform_(p)
 
     def forward(self, src, trg=None):
-
-        src = src.transpose(1, 0) # -> [src_len, batch_size, feature_size]
+        src = src.transpose(1, 0) # [src_len, batch_size, feature_size]
         src_emb = self.positional_encoding(self.src_tok_emb(src))
         memory = self.transformer_encoder(src_emb)
 
-        #if trg is not None:
-        #    trg = trg.transpose(1, 0) # -> [trg_len, batch_size, feature_size]
-        #    trg_mask = generate_square_subsequent_mask(trg.shape[0])
-        #    trg_emb = self.positional_encoding(self.trg_tok_emb(trg))
-        #    outs = self.transformer_decoder(trg_emb, memory, trg_mask)
-        #    return self.generator(outs).transpose(1, 0).squeeze()
-
-        #else:
-        #    outputs = torch.zeros(src.size(1), self.trg_len, 1).to(self.device) # [batch_size, target_len, input_size]
-            #trg = src[-1, :, 3].unsqueeze(0).unsqueeze(2)
-        #    trg = torch.zeros(1, src.size(1), 1).to(self.device)
-
-        #    for t in range(self.trg_len):
-        #        trg_emb = self.positional_encoding(self.trg_tok_emb(trg))
-        #        trg_mask = generate_square_subsequent_mask(trg_emb.shape[0])
-                #out = self.transformer_decoder(trg_emb, memory, trg_mask)
-        #        out = self.transformer_decoder(trg_emb, memory)
-        #        out = self.generator(out)
-        #        outputs[:, t:t+1] = out[-1:, :, :].transpose(1, 0)
-        #        trg = torch.cat((trg, out[-1:, :, :]), dim=0)
-
-        #    return outputs.squeeze(2)
-
         outputs = torch.zeros(src.size(1), self.trg_len, 1).to(self.device) # [batch_size, target_len, input_size]
-        #trg = src[-1, :, 3].unsqueeze(0).unsqueeze(2)
         trg = torch.zeros(1, src.size(1), 1).to(self.device)
 
         for t in range(self.trg_len):
             trg_emb = self.positional_encoding(self.trg_tok_emb(trg))
-            trg_mask = generate_square_subsequent_mask(trg_emb.shape[0])
-            #out = self.transformer_decoder(trg_emb, memory, trg_mask)
             out = self.transformer_decoder(trg_emb, memory)
             out = self.generator(out)
             outputs[:, t:t+1] = out[-1:, :, :].transpose(1, 0)

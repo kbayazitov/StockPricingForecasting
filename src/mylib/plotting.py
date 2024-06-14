@@ -54,6 +54,6 @@ def plot_test_results(model, test_dataset, input_size=30, output_size=10, num_ro
         ax[i].plot(np.linspace(0, input_size, input_size), x_input[0,:,3].tolist(), color='b')
         ax[i].plot(np.linspace(input_size, input_size+output_size+1, output_size+1), [x_input[0,-1,3].item()]+y_input[0,:,3].tolist(), color='g', label='actual')
         ax[i].plot(np.linspace(input_size, input_size+output_size+1, output_size+1), [x_input[0,-1,3].item()]+pred[0].tolist(), color='r', label='pred')
+        ax[i].legend(loc='upper left')
         
-    plt.legend(loc='best')
     plt.show()
